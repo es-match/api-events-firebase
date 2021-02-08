@@ -10,6 +10,26 @@ admin.initializeApp();
 
 const db = admin.firestore().collection("events");
 
+
+app.use("/api/v1", router);
+
+
+// View a contact
+router.get("/events/:id", (request, response) => {
+  db.doc(request.params.id).get()
+      .then((event) => response.status(200).json({
+        id: event.id,
+        userID: event.data().id,
+        eventName: event.data().eventName,
+        locationID: event.data().locationID,
+        startDate: event.data().startDate,
+        endDate: event.data().endDate,
+        createDate: event.data().createDate,
+      })
+          .catch((error) => response.status(400)
+              .send(`Cannot get event: ${error}`)));
+});
+
 router.get("/events", (request, response) => {
   db.get()
       .then((events) => {
@@ -18,7 +38,7 @@ router.get("/events", (request, response) => {
         events.forEach((event) => {
           listEvents.push({
             id: event.id,
-            userID: event.data().id,
+            userID: event.data().userID,
             eventName: event.data().eventName,
             locationID: event.data().locationID,
             startDate: event.data().startDate,
@@ -31,18 +51,11 @@ router.get("/events", (request, response) => {
       });
 });
 
-// View a contact
-router.get("/events/:id", (request, response) => {
-  db.get(request.params.id)
-      .then((doc) => response.status(200).send(doc))
-      .catch((error) => response.status(400)
-          .send(`Cannot get event: ${error}`));
-});
 
 router.post("/events", (request, response) => {
-  const startDate = Date.parse(request.body.startDate);
-  const endDate = Date.parse(request.body.endDate);
-  const actualDate = Date.now();
+  const startDate = new Date(Date.parse(request.body.startDate));
+  const endDate = new Date(Date.parse(request.body.endDate));
+  const actualDate = new Date(Date.now());
 
   const newEvent = {
     "userID": request.body.userID,
@@ -72,8 +85,7 @@ router.delete("/events/:id", (request, response) => {
 router.patch("/events/:id", (request, response) => {
   const startDate = Date.parse(request.body.startDate);
   const endDate = Date.parse(request.body.endDate);
-
-
+  
   const newEvent = {
     "id": request.params.id,
     "userID": request.body.userID,
@@ -92,6 +104,4 @@ router.patch("/events/:id", (request, response) => {
       });
 });
 
-
-app.use("/api/v1", router);
 exports.dbEvents = functions.https.onRequest(app);

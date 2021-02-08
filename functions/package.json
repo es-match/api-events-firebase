@@ -2,8 +2,8 @@
   "name": "functions",
   "description": "Cloud Functions for Firebase",
   "scripts": {
-    "lint": "eslint .",
-    "serve": "firebase emulators:start --only functions",
+    "lint": "eslint . --fix",
+    "serve": "firebase emulators:start --only functions:dbEvents",
     "shell": "firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions:dbEvents",
@@ -21,7 +21,7 @@
     "request-promise": "^4.2.6"
   },
   "devDependencies": {
-    "eslint": "^7.6.0",
+    "eslint": "^7.19.0",
     "eslint-config-google": "^0.14.0",
     "firebase-functions-test": "^0.2.0"
   },
