@@ -8,7 +8,8 @@ const app = require("express")();
 const router = require("express")();
 admin.initializeApp();
 
-const db = admin.firestore().collection("events");
+const db = admin.firestore()
+    .collection("events");
 
 
 app.use("/api/v1", router);
@@ -19,7 +20,7 @@ router.get("/events/:id", (request, response) => {
   db.doc(request.params.id).get()
       .then((event) => response.status(200).json({
         id: event.id,
-        userID: event.data().id,
+        userID: event.data().userID,
         eventName: event.data().eventName,
         locationID: event.data().locationID,
         startDate: event.data().startDate,
@@ -41,9 +42,9 @@ router.get("/events", (request, response) => {
             userID: event.data().userID,
             eventName: event.data().eventName,
             locationID: event.data().locationID,
-            startDate: event.data().startDate,
-            endDate: event.data().endDate,
-            createDate: event.data().createDate,
+            startDate: new Date(event.data().startDate),
+            endDate: new Date(event.data().endDate),
+            createDate: new Date(event.data().createDate),
           });
         });
 
@@ -72,7 +73,7 @@ router.post("/events", (request, response) => {
 });
 
 router.delete("/events/:id", (request, response) => {
-  db.delete(request.params.id)
+  db.doc(request.params.id).delete()
       .then((item) => {
         response.status(204).send(`Event is deleted: ${item}`);
       })
@@ -83,25 +84,39 @@ router.delete("/events/:id", (request, response) => {
 
 // Update new contact
 router.patch("/events/:id", (request, response) => {
-  const startDate = Date.parse(request.body.startDate);
-  const endDate = Date.parse(request.body.endDate);
-  
-  const newEvent = {
-    "id": request.params.id,
-    "userID": request.body.userID,
-    "eventName": request.body.eventName,
-    "locationID": request.body.locationID,
-    "startDate": startDate,
-    "endDate": endDate,
-  };
+  // const startDate = new Date(Date.parse(request.body.startDate));
+  // const endDate = new Date(Date.parse(request.body.endDate));
+  try {
+    const newEvent = {};
+    const body = request.body;
+    if (body.userID) newEvent.userID = body.userID;
 
-  db.update(newEvent)
-      .then((item) => {
-        response.status(204).send(`Event is updated: ${item}`);
-      })
-      .catch((item) => {
-        response.status(404).send("Event updated fail.");
-      });
+    if (body.eventName) newEvent.eventName = body.eventName;
+    if (body.locationID) newEvent.locationID = body.locationID;
+    if (body.startDate) {
+      const startDate = new Date(Date.parse(body.startDate));
+      newEvent.startDate =startDate;
+    }
+    if (body.endDate) {
+      const endDate = new Date(Date.parse(body.endDate));
+      newEvent.endDate = endDate;
+    }
+    db.doc(request.params.id).update(newEvent)
+        .then(
+            (event)=>response.send(`${event.id} updated sucessfully`)
+        );
+    //     .then((event)=>
+    //       response.send(event.data()));
+    // doc.update(newEvent)
+    //     .then((item) => {
+    //       response.status(204).send(`Event is updated: ${item}`);
+    //     })
+    //     .catch((item) => {
+    //       response.status(404).send("Event updated fail.");
+    //     });
+  } catch (ex) {
+    response.status(500).send("ERRO: " + ex.message);
+  }
 });
 
 exports.dbEvents = functions.https.onRequest(app);
