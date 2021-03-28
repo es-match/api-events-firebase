@@ -15,17 +15,64 @@ const db = admin.firestore()
 app.use("/api/v1", router);
 
 
+router.get("/events/byGroup/:groupID", (request, response) => {
+  db.where("groupID", "==", request.params.groupID).get()
+      .then((events) => {
+        if (!events.empty) {
+          const listEvents = [];
+          events.forEach((ev) => {
+            const evData = ev.data();
+
+            listEvents.push({
+              id: ev.id,
+              groupID: evData.groupID == null ?
+              "" : evData.groupID,
+              eventName: evData.eventName == null ?
+              "" : evData.eventName,
+              locationID: evData.locationID == null ?
+              "": evData.locationID,
+              startDate: evData.startDate == null ?
+              [""] : evData.startDate.toDate(),
+              // .toLocaleDateString("pt-BR"),
+              endDate: evData.endDate == null ?
+              [""] : evData.endDate.toDate(),
+              // .toLocaleDateString("pt-BR"),
+              createDate: evData.createDate == null ?
+              [""] : evData.createDate.toDate(),
+              // .toLocaleDateString("pt-BR"),
+              userID: evData.userID == null ?
+               "": evData.userID,
+            });
+          });
+          response.json(listEvents);
+        } else {
+          response.send("Events by Group not found");
+        }
+      });
+
+  // response.send("Events by Group not found");
+});
+
+
 // View a contact
 router.get("/events/:id", (request, response) => {
   db.doc(request.params.id).get()
-      .then((event) => response.status(200).json({
-        id: event.id,
-        userID: event.data().userID,
-        eventName: event.data().eventName,
-        locationID: event.data().locationID,
-        startDate: event.data().startDate,
-        endDate: event.data().endDate,
-        createDate: event.data().createDate,
+      .then((ev) => response.status(200).json({
+        id: ev.id,
+        groupID: ev.data().groupID == null ?
+        "" : ev.data().groupID,
+        eventName: ev.data().eventName == null ?
+        "" : ev.data().eventName,
+        locationID: ev.data().locationID == null ?
+        "": ev.data().locationID,
+        startDate: ev.data().startDate == null ?
+        [""] : ev.data().startDate,
+        endDate: ev.data().endDate == null ?
+         [""] : ev.data().endDate,
+        createDate: ev.data().createDate == null ?
+         [""] : ev.data().createDate,
+        userID: ev.data().userID == null ?
+         "": ev.data().userID,
       })
           .catch((error) => response.status(400)
               .send(`Cannot get event: ${error}`)));
@@ -36,15 +83,23 @@ router.get("/events", (request, response) => {
       .then((events) => {
         const listEvents = [];
 
-        events.forEach((event) => {
+        events.forEach((ev) => {
           listEvents.push({
-            id: event.id,
-            userID: event.data().userID,
-            eventName: event.data().eventName,
-            locationID: event.data().locationID,
-            startDate: new Date(event.data().startDate),
-            endDate: new Date(event.data().endDate),
-            createDate: new Date(event.data().createDate),
+            id: ev.id,
+            groupID: ev.data().groupID == null ?
+            "" : ev.data().groupID,
+            eventName: ev.data().eventName == null ?
+            "" : ev.data().eventName,
+            locationID: ev.data().locationID == null ?
+            "": ev.data().locationID,
+            startDate: ev.data().startDate == null ?
+            [""] : ev.data().startDate,
+            endDate: ev.data().endDate == null ?
+             [""] : ev.data().endDate,
+            createDate: ev.data().createDate == null ?
+             [""] : ev.data().createDate,
+            userID: ev.data().userID == null ?
+             "": ev.data().userID,
           });
         });
 
