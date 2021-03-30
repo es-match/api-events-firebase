@@ -31,6 +31,8 @@ router.get("/events/byGroup/:groupID", (request, response) => {
               "" : evData.eventName,
               locationID: evData.locationID == null ?
               "": evData.locationID,
+              confirmedUsers: evData.confirmedUsers == null ?
+              [""] : evData.confirmedUsers,
               startDate: evData.startDate == null ?
               [""] : evData.startDate.toDate(),
               // .toLocaleDateString("pt-BR"),
@@ -57,22 +59,27 @@ router.get("/events/byGroup/:groupID", (request, response) => {
 // View a contact
 router.get("/events/:id", (request, response) => {
   db.doc(request.params.id).get()
-      .then((ev) => response.status(200).json({
-        id: ev.id,
-        groupID: ev.data().groupID == null ?
-        "" : ev.data().groupID,
-        eventName: ev.data().eventName == null ?
-        "" : ev.data().eventName,
-        locationID: ev.data().locationID == null ?
-        "": ev.data().locationID,
-        startDate: ev.data().startDate == null ?
-        [""] : ev.data().startDate,
-        endDate: ev.data().endDate == null ?
-         [""] : ev.data().endDate,
-        createDate: ev.data().createDate == null ?
-         [""] : ev.data().createDate,
-        userID: ev.data().userID == null ?
-         "": ev.data().userID,
+      .then((event) => response.status(200).json({
+        id: event.id,
+        groupID: event.data().groupID == null ?
+        "" : event.data().groupID,
+        eventName: event.data().eventName == null ?
+        "" : event.data().eventName,
+        locationID: event.data().locationID == null ?
+        "": event.data().locationID,
+        confirmedUsers: event.data().confirmedUsers == null ?
+        [""] : event.data().confirmedUsers,
+        startDate: event.data().startDate == null ?
+        [""] : event.data().startDate.toDate(),
+        // .toLocaleDateString("pt-BR"),
+        endDate: event.data().endDate == null ?
+        [""] : event.data().endDate.toDate(),
+        // .toLocaleDateString("pt-BR"),
+        createDate: event.data().createDate == null ?
+        [""] : event.data().createDate.toDate(),
+        // .toLocaleDateString("pt-BR"),
+        userID: event.data().userID == null ?
+        "": event.data().userID,
       })
           .catch((error) => response.status(400)
               .send(`Cannot get event: ${error}`)));
@@ -92,12 +99,14 @@ router.get("/events", (request, response) => {
             "" : ev.data().eventName,
             locationID: ev.data().locationID == null ?
             "": ev.data().locationID,
+            confirmedUsers: ev.data().confirmedUsers == null ?
+              [""] : ev.data().confirmedUsers,
             startDate: ev.data().startDate == null ?
-            [""] : ev.data().startDate,
+            [""] : ev.data().startDate.toDate(),
             endDate: ev.data().endDate == null ?
-             [""] : ev.data().endDate,
+             [""] : ev.data().endDate.toDate(),
             createDate: ev.data().createDate == null ?
-             [""] : ev.data().createDate,
+             [""] : ev.data().createDate.toDate(),
             userID: ev.data().userID == null ?
              "": ev.data().userID,
           });
