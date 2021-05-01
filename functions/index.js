@@ -55,6 +55,46 @@ router.get("/events/byGroup/:groupID", (request, response) => {
   // response.send("Events by Group not found");
 });
 
+router.get("/events/byLocation/:locationID", (request, response) => {
+  db.where("locationID", "==", request.params.locationID).get()
+      .then((events) => {
+        if (!events.empty) {
+          const listEvents = [];
+          events.forEach((ev) => {
+            const evData = ev.data();
+
+            listEvents.push({
+              id: ev.id,
+              groupID: evData.groupID == null ?
+              "" : evData.groupID,
+              eventName: evData.eventName == null ?
+              "" : evData.eventName,
+              locationID: evData.locationID == null ?
+              "": evData.locationID,
+              confirmedUsers: evData.confirmedUsers == null ?
+              [""] : evData.confirmedUsers,
+              startDate: evData.startDate == null ?
+              [""] : evData.startDate.toDate(),
+              // .toLocaleDateString("pt-BR"),
+              endDate: evData.endDate == null ?
+              [""] : evData.endDate.toDate(),
+              // .toLocaleDateString("pt-BR"),
+              createDate: evData.createDate == null ?
+              [""] : evData.createDate.toDate(),
+              // .toLocaleDateString("pt-BR"),
+              userID: evData.userID == null ?
+               "": evData.userID,
+            });
+          });
+          response.json(listEvents);
+        } else {
+          response.send("Events by Location not found");
+        }
+      });
+
+  // response.send("Events by Group not found");
+});
+
 
 // View a contact
 router.get("/events/:id", (request, response) => {
