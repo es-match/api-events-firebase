@@ -14,6 +14,8 @@ const dbUser = admin.firestore()
     .collection("users");
 const dbLoc = admin.firestore()
     .collection("locations");
+const dbGroup = admin.firestore()
+    .collection("groups");
 
 app.use("/api/v1", router);
 
@@ -140,6 +142,150 @@ router.get("/events/byGroup/:groupID", async (request, response) => {
 
   // response.send("Events by Group not found");
 });
+
+
+router.get("/events/byUserFollow/:userID", async (request, response) => {
+  const groups = await
+  dbGroup
+      .where("groupUsers", "array-contains", request.params.userID).get();
+  // .then((ev)=>{
+  //   const list = [];
+  //   ev.forEach((event)=>{
+  //     list.push(event.id);
+  //   });
+  //   return list;
+  // });
+  if (groups.empty) {
+    response.send("User does not have events");
+  }
+  const listGroups = [];
+  groups.forEach((gr) => {
+    listGroups.push(gr.id);
+  });
+
+
+  const events = await db
+      .where("groupID", "in", listGroups).get();
+
+  if (!events.empty) {
+    const listEvents = [];
+    const tempEvents = [];
+    events.forEach((ev) => {
+      tempEvents.push({
+        id: ev.id,
+        groupID: ev.data().groupID == null ?
+              "" : ev.data().groupID,
+        eventName: ev.data().eventName == null ?
+              "" : ev.data().eventName,
+        locationID: ev.data().locationID == null ?
+              "" : ev.data().locationID,
+        confirmedUsers: ev.data().confirmedUsers == null ?
+              [""] : ev.data().confirmedUsers,
+        startDate: ev.data().startDate == null ?
+              [""] : ev.data().startDate.toDate(),
+        endDate: ev.data().endDate == null ?
+              [""] : ev.data().endDate.toDate(),
+        createDate: ev.data().createDate == null ?
+              [""] : ev.data().createDate.toDate(),
+        userID: ev.data().userID == null ?
+              "" : ev.data().userID,
+      });
+    });
+
+    for (const event of tempEvents) {
+      // groups.forEach((group) => {
+      // if (tempGroups[group] != null) {
+      const eventData = event;
+
+      let _location = {
+        locationName: null,
+        address: null,
+        geolocation:
+            {
+              "latitude":
+                null,
+              "longitude":
+                null,
+            },
+        imageUrl: null,
+      };
+      let _userName;
+
+      try {
+        _userName = await dbUser.doc(eventData.userID).get()
+            .then((user) => {
+              return user.data().userName == null ?
+                  "" : user.data().userName;
+            });
+      } catch (error) {
+        _userName = "";
+      }
+
+      try {
+        _location = await dbLoc.doc(eventData.locationID).get()
+            .then((location) => {
+              return {
+                locationName: location.data().locationName != null ?
+                    location.data().locationName : null,
+                address: location.data().address != null ?
+                    location.data().address : null,
+                geolocation:
+                  {
+                    "latitude": location.data().geolocation.latitude != null ?
+                      location.data().geolocation.latitude.toString() : null,
+                    "longitude": location.data().geolocation.longitude != null ?
+                      location.data().geolocation.longitude.toString() : null,
+
+                  },
+                imageUrl: location.data().imageUrl != null ?
+                  location.data().imageUrl : null,
+              };
+            });
+      } catch (error) {
+        _location = {
+          locationName: null,
+          address: null,
+          geolocation:
+              {
+                "latitude":
+                  null,
+                "longitude":
+                  null,
+              },
+          imageUrl: null,
+        };
+      }
+
+      listEvents.push({
+        id: event.id,
+        groupID: eventData.groupID,
+        eventName: eventData.eventName,
+        locationID: eventData.locationID,
+        confirmedUsers: eventData.confirmedUsers,
+        startDate: eventData.startDate,
+        endDate: eventData.endDate,
+        createDate: eventData.createDate,
+        userID: eventData.userID,
+        userName: _userName,
+        locationName: _location.locationName,
+        address: _location.address,
+        geolocation:
+            {
+              "latitude": _location.geolocation.latitude,
+              "longitude": _location.geolocation.longitude,
+            },
+        imageUrl: _location.imageUrl,
+      });
+      // }
+    }
+    response.json(listEvents);
+  } else {
+    response.send("Events by Group not found");
+  }
+
+  // response.send("Events by Group not found");
+});
+
 
 router.get("/events/byLocation/:locationID", async (request, response) => {
   const events = await db
@@ -271,59 +417,59 @@ router.get("/events/:id", async (request, response) => {
 
   if (event != null) {
     const eventData = {
-        id: event.id,
-        groupID: event.data().groupID == null ?
+      id: event.id,
+      groupID: event.data().groupID == null ?
           "" : event.data().groupID,
-        eventName: event.data().eventName == null ?
+      eventName: event.data().eventName == null ?
           "" : event.data().eventName,
-        locationID: event.data().locationID == null ?
+      locationID: event.data().locationID == null ?
           "" : event.data().locationID,
-        confirmedUsers: event.data().confirmedUsers == null ?
+      confirmedUsers: event.data().confirmedUsers == null ?
           [""] : event.data().confirmedUsers,
-        startDate: event.data().startDate == null ?
+      startDate: event.data().startDate == null ?
           [""] : event.data().startDate.toDate(),
-        endDate: event.data().endDate == null ?
+      endDate: event.data().endDate == null ?
           [""] : event.data().endDate.toDate(),
-        createDate: event.data().createDate == null ?
+      createDate: event.data().createDate == null ?
           [""] : event.data().createDate.toDate(),
-        userID: event.data().userID == null ?
+      userID: event.data().userID == null ?
           "" : event.data().userID,
-      };
+    };
 
 
-      let _location = {
-        locationName: null,
-        address: null,
-        geolocation:
+    let _location = {
+      locationName: null,
+      address: null,
+      geolocation:
         {
           "latitude":
             null,
           "longitude":
             null,
         },
-        imageUrl: null,
-      };
-      let _userName;
+      imageUrl: null,
+    };
+    let _userName;
 
-      try {
-        _userName = await dbUser.doc(eventData.userID).get()
-            .then((user) => {
-              return user.data().userName == null ?
+    try {
+      _userName = await dbUser.doc(eventData.userID).get()
+          .then((user) => {
+            return user.data().userName == null ?
               "" : user.data().userName;
-            });
-      } catch (error) {
-        _userName = "";
-      }
+          });
+    } catch (error) {
+      _userName = "";
+    }
 
-      try {
-        _location = await dbLoc.doc(eventData.locationID).get()
-            .then((location) => {
-              return {
-                locationName: location.data().locationName != null ?
+    try {
+      _location = await dbLoc.doc(eventData.locationID).get()
+          .then((location) => {
+            return {
+              locationName: location.data().locationName != null ?
                 location.data().locationName : null,
-                address: location.data().address != null ?
+              address: location.data().address != null ?
                 location.data().address : null,
-                geolocation:
+              geolocation:
               {
                 "latitude": location.data().geolocation.latitude != null ?
                   location.data().geolocation.latitude.toString() : null,
@@ -331,44 +477,44 @@ router.get("/events/:id", async (request, response) => {
                   location.data().geolocation.longitude.toString() : null,
 
               },
-                imageUrl: location.data().imageUrl != null ?
+              imageUrl: location.data().imageUrl != null ?
               location.data().imageUrl : null,
-              };
-            });
-      } catch (error) {
-        _location = {
-          locationName: null,
-          address: null,
-          geolocation:
+            };
+          });
+    } catch (error) {
+      _location = {
+        locationName: null,
+        address: null,
+        geolocation:
           {
             "latitude":
               null,
             "longitude":
               null,
           },
-          imageUrl: null,
-        };
-      }
-      let finalEvent = {
-        id: event.id,
-        groupID: eventData.groupID,
-        eventName: eventData.eventName,
-        locationID: eventData.locationID,
-        confirmedUsers: eventData.confirmedUsers,
-        startDate: eventData.startDate,
-        endDate: eventData.endDate,
-        createDate: eventData.createDate,
-        userID: eventData.userID,
-        userName: _userName,
-        locationName: _location.locationName,
-        address: _location.address,
-        geolocation:
+        imageUrl: null,
+      };
+    }
+    const finalEvent = {
+      id: event.id,
+      groupID: eventData.groupID,
+      eventName: eventData.eventName,
+      locationID: eventData.locationID,
+      confirmedUsers: eventData.confirmedUsers,
+      startDate: eventData.startDate,
+      endDate: eventData.endDate,
+      createDate: eventData.createDate,
+      userID: eventData.userID,
+      userName: _userName,
+      locationName: _location.locationName,
+      address: _location.address,
+      geolocation:
         {
           "latitude": _location.geolocation.latitude,
           "longitude": _location.geolocation.longitude,
         },
-        imageUrl: _location.imageUrl,
-      };
+      imageUrl: _location.imageUrl,
+    };
 
     response.json(finalEvent);
   } else {
