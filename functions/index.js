@@ -836,9 +836,9 @@ router.post("/events", async (request, response) => {
             geolocation:
           {
             "_latitude": location.data().geolocation._latitude != null ?
-              location.data().geolocation.latitude : null,
+              location.data().geolocation._latitude : null,
             "_longitude": location.data().geolocation._longitude != null ?
-              location.data().geolocation.longitude : null,
+              location.data().geolocation._longitude : null,
 
           },
             imageUrl: location.data().imageUrl != null ?
