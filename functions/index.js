@@ -112,10 +112,10 @@ router.get("/events/byGroup/:groupID", async (request, response) => {
                 location.data().address : null,
                 geolocation:
               {
-                "_latitude": location.data().geolocation.latitude != null ?
-                  location.data().geolocation.latitude : null,
-                "_longitude": location.data().geolocation.longitude != null ?
-                  location.data().geolocation.longitude : null,
+                "_latitude": location.data().geolocation._latitude != null ?
+                  location.data().geolocation._latitude : null,
+                "_longitude": location.data().geolocation._longitude != null ?
+                  location.data().geolocation._longitude : null,
 
               },
                 imageUrl: location.data().imageUrl != null ?
@@ -279,9 +279,9 @@ router.get("/events/byUserFollow/:userID", async (request, response) => {
                 location.data().address : null,
                 geolocation:
               {
-                "_latitude": location.data().geolocation.latitude != null ?
+                "_latitude": location.data().geolocation._latitude != null ?
                   location.data().geolocation.latitude : null,
-                "_longitude": location.data().geolocation.longitude != null ?
+                "_longitude": location.data().geolocation._longitude != null ?
                   location.data().geolocation.longitude : null,
 
               },
@@ -427,9 +427,9 @@ router.get("/events/byLocation/:locationID", async (request, response) => {
                 location.data().address : null,
                 geolocation:
               {
-                "_latitude": location.data().geolocation.latitude != null ?
+                "_latitude": location.data().geolocation._latitude != null ?
                   location.data().geolocation.latitude : null,
-                "_longitude": location.data().geolocation.longitude != null ?
+                "_longitude": location.data().geolocation._longitude != null ?
                   location.data().geolocation.longitude : null,
 
               },
@@ -567,9 +567,9 @@ router.get("/events/:id", async (request, response) => {
               location.data().address : null,
               geolocation:
             {
-              "_latitude": location.data().geolocation.latitude != null ?
+              "_latitude": location.data().geolocation._latitude != null ?
                 location.data().geolocation.latitude : null,
-              "_longitude": location.data().geolocation.longitude != null ?
+              "_longitude": location.data().geolocation._longitude != null ?
                 location.data().geolocation.longitude : null,
 
             },
@@ -709,9 +709,9 @@ router.get("/events", async (request, response) => {
                 location.data().address : null,
                 geolocation:
               {
-                "_latitude": location.data().geolocation.latitude != null ?
+                "_latitude": location.data().geolocation._latitude != null ?
                   location.data().geolocation.latitude : null,
-                "_longitude": location.data().geolocation.longitude != null ?
+                "_longitude": location.data().geolocation._longitude != null ?
                   location.data().geolocation.longitude : null,
 
               },
@@ -791,7 +791,7 @@ router.post("/events", async (request, response) => {
     "userID": request.body.userID,
     "eventName": request.body.eventName,
     "locationID": request.body.locationID,
-    "groupID":request.body.groupID,
+    "groupID": request.body.groupID,
     "startDate": startDate,
     "endDate": endDate,
     "createDate": actualDate,
@@ -835,9 +835,9 @@ router.post("/events", async (request, response) => {
             location.data().address : null,
             geolocation:
           {
-            "_latitude": location.data().geolocation.latitude != null ?
+            "_latitude": location.data().geolocation._latitude != null ?
               location.data().geolocation.latitude : null,
-            "_longitude": location.data().geolocation.longitude != null ?
+            "_longitude": location.data().geolocation._longitude != null ?
               location.data().geolocation.longitude : null,
 
           },
