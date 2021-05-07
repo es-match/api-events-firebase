@@ -194,7 +194,7 @@ router.get("/events/byUserFollow/:userID", async (request, response) => {
   const listEvents = [];
 
 
-  for (let i = 0; i < Math.trunc(totalPagesArrays / 10); i++) {
+  for (let i = 0; i <= Math.trunc(totalPagesArrays / 10); i++) {
     const tempEvents = [];
     const start = i * 10;
     let end = i + 9;
